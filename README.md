@@ -5,7 +5,7 @@ Analyze messages data collected by <a href="https://www.figure-eight.com/" targe
 
 ### Installations:
 1. Run following command for pre-required python libraries.
-    `pip install -r requirements.txt`
+* `pip install -r requirements.txt`
 
 ### File Description
     .
