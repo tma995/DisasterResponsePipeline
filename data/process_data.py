@@ -5,6 +5,15 @@ import pandas as pd
 
 
 def load_data(messages_filepath, categories_filepath):
+    '''Load and merge datasets
+    
+    input:
+        messages_filepath: The path of messages data.
+        categories_filepath: The path of categories data.
+        
+    output:
+        df: The dataframe of merged datasets.
+    '''
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages,categories,on='id')
@@ -12,8 +21,21 @@ def load_data(messages_filepath, categories_filepath):
     
 
 def clean_data(df):
+    '''Clean dataframe
+    
+    input:
+        The dataframe of merged data.
+        
+    output:
+        Cleaned dataframe.
+    '''
+    # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(';',expand=True)
+    
+    # extract new column names for categories.
     categories.columns = [i[:-2] for i in categories.iloc[0]]
+    
+    # Convert category values to just numbers 0 or 1.
     for column in categories:
         # set each value to be the last character of the string
         categories[column] = categories[column].apply(lambda x:x[-1:])
@@ -23,15 +45,24 @@ def clean_data(df):
         
         categories[column] = categories[column].apply(lambda x:1 if x>1 else x)
         
+    # Replace categories column in df with new category columns.
     df.drop('categories',axis=1, inplace=True)
     df = pd.concat([df,categories],axis=1)
+    
+    # Remove duplicates.
     df.drop_duplicates(inplace=True)
-    print('len:',len(df))
-    print(df.iloc[0])
     return df
 
 
 def save_data(df, database_filename):
+    '''Save the clean dataset into an sqlite database.
+    
+    input:
+        df: Tleaned dataframe.
+        
+    output:
+        database_filename: db filepath.
+    '''
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql('MessageAndLabel', engine, if_exists='replace', index=False)  
 

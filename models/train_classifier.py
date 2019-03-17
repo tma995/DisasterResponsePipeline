@@ -30,6 +30,16 @@ nltk.download('wordnet')
 
 
 def load_data(database_filepath):
+    '''load data from database
+    
+    input:
+        database_filepath: filepath of the database.
+        
+    output:
+        X: messages.
+        Y: labels.
+        category_names: category name list for labels.
+    '''
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('MessageAndLabel',engine)
     X = df['message']
@@ -39,6 +49,14 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''tokenization function to process text data.
+    
+    input:
+        text: original text messages.
+        
+    output:
+        clean_tokens: cleaned token list after text normalizing, tokenizing and lemmatizing
+    '''
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -56,26 +74,59 @@ def tokenize(text):
 
 
 def build_model():
+    '''Build pipeline model with GridSearchCV.
+    
+    input:
+        none.
+        
+    output:
+        cv: model structure.
+    '''
+    # build pipelines
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer = tokenize)),
         ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
+    
+    # define parameters for GridSearchCV.
     parameters = {'vect__min_df': [1, 5],
                   'clf__estimator__n_estimators':[10, 25], 
                   'clf__estimator__max_depth':[3, 5],
                   'clf__estimator__max_features': ['sqrt', 0.3]
                  }
+    
+    # build GridSearchCV structure.
     cv = GridSearchCV(pipeline, param_grid=parameters)
     return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''performance evaluation for trained model on test datasets.
+    
+    input:
+        model: trained model.
+        X_test: message data in test set.
+        Y_test: label data in test set.
+        category_names: category name list for labels.
+        
+    output:
+        printing evaluation scores.
+    '''
     Y_pred = model.predict(X_test)
     print(classification_report(Y_test, Y_pred, target_names=category_names, digits=2))
 
 
 def save_model(model, model_filepath):
+    '''Export model as a pickle file.
+    
+    input:
+        model: trained model.
+        model_filepath: output filepath.
+        
+    output:
+        none.
+    '''
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
