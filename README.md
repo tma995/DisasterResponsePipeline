@@ -4,8 +4,14 @@
 Analyze messages data collected by <a href="https://www.figure-eight.com/" target="_blank">Figure Eight</a>, build a classification model and web services to help classify new messages for disaster response organizations.
 
 ### Installations:
-1. Run following command for pre-required python libraries.
-    - `pip install -r requirements.txt`
+To install the flask app, you need:
+- python3
+- python packages in the requirements.txt file
+ 
+ Install the packages with
+``` 
+ pip install -r requirements.txt
+```
 
 ### File Description
     .
