@@ -114,8 +114,14 @@ def evaluate_model(model, X_test, Y_test, category_names):
         printing evaluation scores.
     '''
     Y_pred = model.predict(X_test)
+    #for i,c in enumerate(Y_test.columns):
+    #    accuracy = accuracy_score(Y_test[c], Y_pred[:,i])
+    #    precision = precision_score(Y_test[c], Y_pred[:,i])
+    #    recall = recall_score(Y_test[c], Y_pred[:,i])
+    #    f1 = f1_score(Y_test[c], Y_pred[:,i])
+    #    print('column:',c,';accuracy:',accuracy,';precision:',precision,';recall:',recall,';f1:',f1)
     print(classification_report(Y_test, Y_pred, target_names=category_names, digits=2))
-
+    
 
 def save_model(model, model_filepath):
     '''Export model as a pickle file.

@@ -7,7 +7,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Heatmap
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -46,6 +46,9 @@ def index():
     category_counts= df.drop(['id','message','original','genre'], axis=1).sum().sort_values(ascending=False)[1:11]
     category_names= list(category_counts.index)
     
+    df_cat = df[category_names+['genre']].groupby('genre').sum()
+    df_corr = df[category_names].corr()
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -68,15 +71,11 @@ def index():
             }
         },
         {
-            'data': [
-                Bar(
-                    x=category_names,
-                    y=category_counts
-                )
-            ],
+            'data': [Bar(x=category_names,y=df_cat.loc[i],name=i) for i in df_cat.index],
 
             'layout': {
-                'title': 'Distribution of top 10 Message Categories',
+                'barmode':'stack',
+                'title': 'Distribution of Top 10 Message Categories',
                 'yaxis': {
                     'title': "Count"
                 },
@@ -84,7 +83,24 @@ def index():
                     'title': "Category"
                 }
             }
-        }
+        },
+        {
+            'data': [
+                Heatmap(
+                    z=df_corr.values.tolist(),
+                    x=category_names,
+                    y=category_names,
+                    colorscale='YlGnBu'
+                )
+            ],
+
+            'layout': {
+                'title': 'Correlation of Top 10 Message Categories',
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
     ]
     
     # encode plotly graphs in JSON
